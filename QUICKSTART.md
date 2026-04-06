@@ -17,6 +17,9 @@ Mở file `.env` và điền API key:
 OPENAI_API_KEY=sk-...
 DEFAULT_PROVIDER=openai
 DEFAULT_MODEL=gpt-4o
+GEMINI_API_KEY=your_gemini_api_key_here
+LOCAL_MODEL_PATH=./models/gemma-4-E4B-it-Q4_1.gguf
+SERPAPI_API_KEY=your_serpapi_api_key_here
 ```
 
 ## 3. Khởi tạo database
@@ -96,6 +99,38 @@ iPhone 15 128GB: Còn 5 sản phẩm trong kho
 
 ---
 
+### `web_search_product(query)`
+Tìm kiếm thông tin, tính năng và giá cả của một sản phẩm trên mạng Internet nếu sản phẩm không có trong kho.
+
+- Input: từ khóa tìm kiếm, ví dụ `"iPhone 15 Pro Max"`
+- Xử lý: Gọi API SerpAPI để tìm kiếm Google
+- Output: Danh sách các trang web tìm thấy gồm tiêu đề, URL, snippet
+- Lỗi: trả về thông báo lỗi nếu yêu cầu bị lỗi
+
+```
+Kết quả tìm kiếm web cho 'iPhone 15 Pro Max':
+1. iPhone 15 Pro Max - Apple (VN)
+URL: https://www.apple.com/vn/iphone-15-pro/...
+Snippet: ...
+```
+
+---
+
+### `read_web_page(url)`
+Đọc chi tiết văn bản của một bài viết hoặc trang web để lấy thông tin.
+
+- Input: một đường link (URL) hợp lệ
+- Xử lý: Lấy nội dung trang bằng BeautifulSoup, loại bỏ thẻ không cần thiết, tự động cắt bớt văn bản quá dài
+- Output: Nội dung văn bản thuần túy tóm gọn của URL đó
+- Lỗi: trả về thông báo nếu mất mạng hoặc quá thời gian truy cập (timeout)
+
+```
+Nội dung từ https://example.com/article:
+... (văn bản của trang web)
+```
+
+---
+
 ## 5. Test từng tool riêng lẻ
 
 ```bash
@@ -103,9 +138,11 @@ python -c "from src.tools.search_product import search_product; print(search_pro
 python -c "from src.tools.get_product_detail import get_product_detail; print(get_product_detail('p001'))"
 python -c "from src.tools.compare_product import compare_product; print(compare_product('p001,p003'))"
 python -c "from src.tools.check_inventory import check_inventory; print(check_inventory('p002'))"
+python -c "from src.tools.web_search_product import web_search_product; print(web_search_product('iPhone 15'))"
+python -c "from src.tools.read_web_page import read_web_page; print(read_web_page('https://example.com'))"
 ```
 
-## 5. Chạy demo Agent vs Chatbot
+## 6. Chạy demo Agent vs Chatbot
 
 ```bash
 python run_demo.py
@@ -130,7 +167,9 @@ src/
 │   ├── search_product.py
 │   ├── get_product_detail.py
 │   ├── compare_product.py
-│   └── check_inventory.py
+│   ├── check_inventory.py
+│   ├── web_search_product.py
+│   └── read_web_page.py
 └── telemetry/
     ├── logger.py
     └── metrics.py
